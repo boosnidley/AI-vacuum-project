@@ -311,14 +311,13 @@ class XYEnvironment(Environment):
                 t.location = destination
         return thing.bump
 
-    def add_thing(self, thing, location=None, exclude_duplicate_class_items=False):
-        """Add things to the world. If (exclude_duplicate_class_items) then the item won't be
-        added if the location has at least one item of the same class."""
+    def add_thing(self, thing, location=None, empty_only=False):
+        """Add things to the world. If empty_only then the item won't be
+        added if the location has anything in it."""
         if location is None:
             super().add_thing(thing)
         elif self.is_inbounds(location):
-            if (exclude_duplicate_class_items and
-                    any(isinstance(t, thing.__class__) for t in self.list_things_at(location))):
+            if empty_only and self.list_things_at(location):
                 return
             super().add_thing(thing, location)
 
