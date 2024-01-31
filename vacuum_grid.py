@@ -2,6 +2,8 @@
 from environments import XYEnvironment, Wall, Obstacle, Dirt, Agent
 import random
 from dataclasses import dataclass
+import os
+from time import sleep
 
 
 @dataclass(frozen=True, order=True)
@@ -78,6 +80,11 @@ class VacuumGrid(XYEnvironment):
                             and not self.some_things_at(new_loc, Wall)):
                 agent.location = new_loc
 
+    def is_done(self):
+        return len([d for d in self.things if isinstance(d, Dirt)]) == 0
+
     def display(self, s, action):
+        sleep(0.5)
+        os.system('clear')
         print(f'step {s}: action {action}')
         self.agents[0].program.show_state()
