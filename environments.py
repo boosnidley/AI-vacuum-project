@@ -336,8 +336,8 @@ class XYEnvironment(Environment):
 
     def random_location_inbounds(self, exclude=None):
         """Returns a random location that is inbounds (within walls if we have walls)"""
-        location = (random.randint(self.x_start, self.x_end),
-                    random.randint(self.y_start, self.y_end))
+        location = (random.randint(self.x_start, self.x_end - 1),
+                    random.randint(self.y_start, self.y_end - 1))
         if exclude is not None:
             while location == exclude:
                 location = (random.randint(self.x_start, self.x_end),
