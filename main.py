@@ -1,11 +1,9 @@
-from environments import TrivialVacuumEnvironment
-from agent_programs import model_based_vacuum_agent
+from vacuum_grid import VacuumGrid
+from vacuum_planning_agent_program import VacuumPlanningAgentProgram
+from environments import Agent
 
-env = TrivialVacuumEnvironment()
-vacuum = model_based_vacuum_agent()
-env.add_thing(vacuum)
-
-print(f'env status: {env.status}')
+env = VacuumGrid(10, 10)
+agent = Agent(VacuumPlanningAgentProgram())
+env.add_thing(agent)
 env.run()
-print(f'perf. score = {vacuum.performance}')
-print(f'env status: {env.status}')
+agent.program.show_state()
