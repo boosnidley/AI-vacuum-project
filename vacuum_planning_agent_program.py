@@ -81,7 +81,7 @@ class VacuumPlanningAgentProgram(SimpleProblemSolvingAgentProgram):
         return VacuumGridProblem(self.state)
 
     def search(self, problem):
-        return astar_search(problem, lambda n: len(n.state.dirts), display=False).solution()
+        return astar_search(problem, lambda n: 10*len(n.state.dirts), display=False).solution()
 
     def show_state(self):
         self.state.display()
