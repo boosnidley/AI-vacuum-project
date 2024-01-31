@@ -1,7 +1,7 @@
 from search import Problem, Node, SimpleProblemSolvingAgentProgram, astar_search
 
 
-class VacuumProblem(Problem):
+class VacuumGridProblem(Problem):
     def __init__(self, initial, width, height, goal=None):
         super().__init__(initial, goal)
         self.width = width
@@ -26,20 +26,31 @@ class VacuumProblem(Problem):
         return acts
 
     def result(self, state, action):
+        new_state = state.copy()
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        raise NotImplementedError
+        if action == 'Suck' and new_state['agent'] in new_state['dirts']:
+            new_state['dirts'].remove(new_state['agent'])
+            return new_state
 
-    def goal_test(self, state):
+        loc = state['agent']
+        new_loc = None
+        if action == 'Left':
+            new_loc = (loc[0]-1, loc[1])
+        elif action == 'Right':
+            new_loc = (loc[0]+1, loc[1])
+        elif action == 'Up':
+            new_loc = (loc[0], loc[1]-1)
+        elif action == 'Down':
+            new_loc = (loc[0], loc[1]+1)
 
+        if self.is_inbounds(new_loc) and new_loc not in new_state['obstacles']:
+            new_state['agent'] = new_loc
+
+        return new_state
 
     def path_cost(self, c, state1, action, state2):
-        """Return the cost of a solution path that arrives at state2 from
-        state1 via action, assuming cost c to get up to state1. If the problem
-        is such that the path doesn't matter, this function will only look at
-        state2. If the path does matter, it will consider c and maybe state1
-        and action. The default method costs 1 for every step in the path."""
         return c + 1
 
     def is_inbounds(self, loc):
@@ -49,12 +60,8 @@ class VacuumProblem(Problem):
 
 
 class VacuumPlanningAgentProgram(SimpleProblemSolvingAgentProgram):
-    def __init__(self, initial_state=None):
-        """State is an abstract representation of the state
-        of the world, and seq is the list of actions required
-        to get to a particular state from the initial state(root)."""
-        self.state = initial_state
-        self.seq = []
+    def __init__(self, initial_state):
+        super().__init__(initial_state)
 
     def __call__(self, percept):
         """[Figure 3.1] Formulate a goal and problem, then
