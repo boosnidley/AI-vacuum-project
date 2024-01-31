@@ -1,6 +1,33 @@
 
 from environments import XYEnvironment, Wall, Obstacle, Dirt, Agent
 import random
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, order=True)
+class VGState:
+    width: int
+    height: int
+    agent: tuple[int, int]
+    obstacles: tuple[tuple[int, int], ...]
+    dirts: tuple[tuple[int, int], ...]
+
+    def display(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                if (x, y) == self.agent:
+                    print('V', end=" ")
+                elif (x, y) in self.obstacles:
+                    print('C', end=" ")
+                elif (x, y) in self.dirts:
+                    print('#', end=" ")
+                elif x == 0 or x == self.width - 1:
+                    print('|', end=" ")
+                elif y == 0 or y == self.height - 1:
+                    print('-', end=" ")
+                else:
+                    print('.', end=" ")
+            print()
 
 
 class VacuumGrid(XYEnvironment):
@@ -24,11 +51,10 @@ class VacuumGrid(XYEnvironment):
 
     def percept(self, agent):
         # the agent can see the entire environment. How does this work:
-        return {
-            'agent': self.agents[0].location,
-            'obstacles': [o.location for o in self.things if isinstance(o, Obstacle)],
-            'dirts': [d.location for d in self.things if isinstance(d, Dirt)]
-        }
+        return VGState(width=self.width, height=self.height,
+                       agent=self.agents[0].location,
+                       obstacles=tuple([o.location for o in self.things if isinstance(o, Obstacle)]),
+                       dirts=tuple([d.location for d in self.things if isinstance(d, Dirt)]))
 
     def execute_action(self, agent, action):
         if action == 'Suck':
@@ -44,10 +70,14 @@ class VacuumGrid(XYEnvironment):
             elif action == 'Right':
                 new_loc = (agent.location[0]+1, agent.location[1])
             elif action == 'Up':
-                new_loc = (agent.location[0], agent.location[1]+1)
+                new_loc = (agent.location[0], agent.location[1]-1)
             elif action == 'Down':
                 new_loc = (agent.location[0], agent.location[1]+1)
 
             if new_loc and (not self.some_things_at(new_loc, Obstacle)
                             and not self.some_things_at(new_loc, Wall)):
                 agent.location = new_loc
+
+    def display(self, s, action):
+        print(f'step {s}: action {action}')
+        self.agents[0].program.show_state()

@@ -44,6 +44,10 @@ class Agent(Thing):
         self.bump = False
         self.holding = []
         self.performance = 0
+        self.program = None
+        self.set_program(program)
+
+    def set_program(self, program):
         if program is None or not isinstance(program, collections.abc.Callable):
             print("Can't find a valid program for {}, falling back to default.".format(self.__class__.__name__))
 
@@ -96,7 +100,7 @@ class Environment:
         """By default, we're done when we can't find a live agent."""
         return not any(agent.is_alive() for agent in self.agents)
 
-    def step(self):
+    def step(self, s):
         """Run the environment for one time step. If the
         actions and exogenous changes are independent, this method will
         do. If there are interactions between them, you'll need to
@@ -111,13 +115,14 @@ class Environment:
             for (agent, action) in zip(self.agents, actions):
                 self.execute_action(agent, action)
             self.exogenous_change()
+            self.display(s, actions)
 
     def run(self, steps=1000):
         """Run the Environment for given number of time steps."""
         for step in range(steps):
             if self.is_done():
                 return
-            self.step()
+            self.step(step)
 
     def list_things_at(self, location, tclass=Thing):
         """Return all things exactly at a given location."""
@@ -158,6 +163,9 @@ class Environment:
             print("  from list: {}".format([(thing, thing.location) for thing in self.things]))
         if thing in self.agents:
             self.agents.remove(thing)
+
+    def display(self, s, action):
+        pass
 
 
 class Direction:

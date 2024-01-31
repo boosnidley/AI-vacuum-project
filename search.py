@@ -139,35 +139,43 @@ class SimpleProblemSolvingAgentProgram:
     Abstract framework for a problem-solving agent.
     """
 
-    def __init__(self, initial_state=None):
+    def __init__(self):
         """State is an abstract representation of the state
         of the world, and seq is the list of actions required
         to get to a particular state from the initial state(root)."""
-        self.state = initial_state
+        self.state = None
+        self.goal = None
         self.seq = []
 
     def __call__(self, percept):
         """[Figure 3.1] Formulate a goal and problem, then
         search for a sequence of actions to solve it."""
-        self.state = self.update_state(self.state, percept)
+        self.update_state(percept)
+
         if not self.seq:
-            goal = self.formulate_goal(self.state)
-            problem = self.formulate_problem(self.state, goal)
+            self.formulate_goal()
+            problem = self.formulate_problem()
             self.seq = self.search(problem)
+            print(f'found solution with {len(self.seq)} actions')
             if not self.seq:
                 return None
         return self.seq.pop(0)
 
-    def update_state(self, state, percept):
+    def update_state(self, percept):
+        """Override to revise our world state model given this percept"""
         raise NotImplementedError
 
-    def formulate_goal(self, state):
-        raise NotImplementedError
+    def formulate_goal(self):
+        """Override to set self.goal. If the Problem handles goals computationally, do nothing"""
+        self.goal = None
 
-    def formulate_problem(self, state, goal):
+    def formulate_problem(self):
+        """Create and return a Problem object that will be used by our search algorithm"""
         raise NotImplementedError
 
     def search(self, problem):
+        """Override to select and execute the search algorithm of your choice.
+        Using problem and self.goal. Return the result of the search"""
         raise NotImplementedError
 
 
@@ -271,6 +279,8 @@ def best_first_graph_search(problem, f, display=False):
     frontier.append(node)
     explored = set()
     while frontier:
+        if display:
+            print(f'{len(frontier)} nodes in frontier')
         node = frontier.pop()
         if problem.goal_test(node.state):
             if display:
@@ -278,12 +288,14 @@ def best_first_graph_search(problem, f, display=False):
             return node
         explored.add(node.state)
         for child in node.expand(problem):
-            if child.state not in explored and child not in frontier:
+            if child.state in explored:
+                pass
+            elif child not in frontier:
                 frontier.append(child)
-            elif child in frontier:
-                if f(child) < frontier[child]:
-                    del frontier[child]
-                    frontier.append(child)
+            elif f(child) < frontier[child]:
+                del frontier[child]
+                frontier.append(child)
+
     return None
 
 
