@@ -393,7 +393,7 @@ class Dirt(Thing):
     pass
 
 
-class Wall(Obstacle):
+class Wall(Thing):
     pass
 
 
