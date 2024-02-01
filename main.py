@@ -8,3 +8,6 @@ env.add_thing(agent)
 env.run()
 print('Final State')
 agent.program.show_state()
+
+
+
